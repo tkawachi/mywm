@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "MyWM - Window Manager",
+  "version": "1.0.0",
+  "description": "A powerful window and tab manager for Chrome",
+  "permissions": [
+    "tabs",
+    "windows",
+    "storage",
+    "tabGroups"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "commands": {
+    "save-window": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Save current window"
+    },
+    "search-tabs": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "Command+Shift+F"
+      },
+      "description": "Search tabs"
+    }
+  }
+}
