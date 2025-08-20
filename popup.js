@@ -24,6 +24,11 @@ function setupEventListeners() {
       searchTabs(e.target.value);
     }, 300);
   });
+  
+  document.getElementById('openManager').addEventListener('click', () => {
+    chrome.tabs.create({ url: 'manager.html' });
+    window.close();
+  });
 }
 
 function switchTab(tabName) {

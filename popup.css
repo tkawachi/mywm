@@ -29,6 +29,30 @@ body {
   margin-bottom: 10px;
 }
 
+.header-actions {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+
+.header-button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.header-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 .search-container {
   position: relative;
 }
