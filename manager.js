@@ -215,7 +215,7 @@ function createWindowCard(window, index, isSaved) {
   header.appendChild(meta);
   
   const tabsContainer = document.createElement('div');
-  tabsContainer.className = 'tabs-container';
+  tabsContainer.className = 'tabs-container expanded';
   
   // Group tabs by domain
   const domainGroups = groupTabsByDomain(window.tabs);
