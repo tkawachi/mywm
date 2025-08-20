@@ -321,7 +321,7 @@ body {
 .tab-item {
   display: flex;
   align-items: center;
-  padding: 8px 16px;
+  padding: 4px 16px;
   border-bottom: 1px solid #f0f0f0;
   cursor: pointer;
   transition: background 0.2s;
@@ -357,16 +357,9 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 
-.tab-url {
-  font-size: 11px;
-  color: #999;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 .tab-indicators {
   display: flex;
@@ -392,35 +385,7 @@ body {
   background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23667eea"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>') center/contain no-repeat;
 }
 
-.tab-actions {
-  display: flex;
-  gap: 4px;
-}
 
-.tab-action {
-  padding: 2px 6px;
-  border: 1px solid #ddd;
-  background: #fff;
-  border-radius: 3px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.2s;
-  color: #666;
-}
-
-.tab-action:hover {
-  background: #f5f5f5;
-  border-color: #ccc;
-}
-
-.tab-action.close {
-  color: #e53e3e;
-  border-color: #fed7d7;
-}
-
-.tab-action.close:hover {
-  background: #fed7d7;
-}
 
 .empty-state {
   text-align: center;
@@ -562,7 +527,7 @@ body.dark-mode .toolbar-btn:hover {
 .domain-group-header {
   display: flex;
   align-items: center;
-  padding: 10px 16px;
+  padding: 6px 16px;
   background: #f5f5f5;
   cursor: pointer;
   transition: background 0.2s;

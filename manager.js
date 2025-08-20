@@ -257,12 +257,7 @@ function createTabItem(tab, windowId, isSaved) {
   title.className = 'tab-title';
   title.textContent = tab.title || 'Untitled';
   
-  const url = document.createElement('div');
-  url.className = 'tab-url';
-  url.textContent = tab.url;
-  
   info.appendChild(title);
-  info.appendChild(url);
   
   const indicators = document.createElement('div');
   indicators.className = 'tab-indicators';
@@ -283,25 +278,8 @@ function createTabItem(tab, windowId, isSaved) {
     }
   }
   
-  const actions = document.createElement('div');
-  actions.className = 'tab-actions';
-  
-  if (!isSaved) {
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'tab-action close';
-    closeBtn.textContent = '✕';
-    closeBtn.onclick = (e) => {
-      e.stopPropagation();
-      chrome.tabs.remove(tab.id);
-      loadActiveWindows();
-    };
-    
-    actions.appendChild(closeBtn);
-  }
-  
   item.appendChild(info);
   item.appendChild(indicators);
-  item.appendChild(actions);
   
   if (!isSaved) {
     item.onclick = (event) => {
