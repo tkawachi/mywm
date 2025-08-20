@@ -21,8 +21,7 @@ function setupEventListeners() {
     });
   });
 
-  // Toolbar buttons
-  document.getElementById('refreshBtn').addEventListener('click', refresh);
+  // Toolbar buttons (refresh button removed - auto-refresh is now enabled)
   document.getElementById('mergeAllBtn').addEventListener('click', mergeAllWindows);
   document.getElementById('saveAllBtn').addEventListener('click', saveAllWindows);
   document.getElementById('listViewBtn').addEventListener('click', () => setViewMode('list'));
@@ -52,10 +51,12 @@ function setupEventListeners() {
     }
   });
 
-  // Message listener for keyboard shortcuts
+  // Message listener for keyboard shortcuts and auto-refresh
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'executeSort') {
       executeSortOnAllWindows();
+    } else if (message.action === 'autoRefresh') {
+      refresh();
     }
   });
 }

@@ -8,6 +8,37 @@ chrome.runtime.onInstalled.addListener(() => {
   });
 });
 
+// Auto-refresh event listeners
+chrome.tabs.onCreated.addListener(() => {
+  notifyUIRefresh();
+});
+
+chrome.tabs.onRemoved.addListener(() => {
+  notifyUIRefresh();
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  // Only refresh on meaningful changes (URL, title, or status changes)
+  if (changeInfo.url || changeInfo.title || changeInfo.status === 'complete') {
+    notifyUIRefresh();
+  }
+});
+
+chrome.windows.onCreated.addListener(() => {
+  notifyUIRefresh();
+});
+
+chrome.windows.onRemoved.addListener(() => {
+  notifyUIRefresh();
+});
+
+function notifyUIRefresh() {
+  // Send message to all manager pages to refresh
+  chrome.runtime.sendMessage({ action: 'autoRefresh' }).catch(() => {
+    // Ignore errors if no manager page is open
+  });
+}
+
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === 'save-window') {
     await saveCurrentWindow();
