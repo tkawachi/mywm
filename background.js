@@ -90,7 +90,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sortTabsInWindow(request.windowId, request.sortedTabIds);
     return true;
   } else if (request.action === 'sortAllWindows') {
-    sortAllWindows(request.sortBy, request.sortDirection);
+    sortAllWindows();
     return true;
   }
 });
@@ -159,31 +159,15 @@ async function sortTabsInWindow(windowId, sortedTabIds) {
   }
 }
 
-async function sortAllWindows(sortBy) {
+async function sortAllWindows() {
   try {
     const windows = await chrome.windows.getAll({ populate: true });
     
     for (const window of windows) {
+      // Always sort by domain
       const sortedTabs = window.tabs.slice().sort((a, b) => {
-        let aValue, bValue;
-        
-        switch (sortBy) {
-          case 'title':
-            aValue = a.title.toLowerCase();
-            bValue = b.title.toLowerCase();
-            break;
-          case 'url':
-            aValue = a.url.toLowerCase();
-            bValue = b.url.toLowerCase();
-            break;
-          case 'domain':
-            aValue = new URL(a.url).hostname.toLowerCase();
-            bValue = new URL(b.url).hostname.toLowerCase();
-            break;
-          default:
-            return 0;
-        }
-        
+        const aValue = new URL(a.url).hostname.toLowerCase();
+        const bValue = new URL(b.url).hostname.toLowerCase();
         return aValue.localeCompare(bValue);
       });
       

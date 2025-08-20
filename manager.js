@@ -1,7 +1,6 @@
 let currentWindows = [];
 let savedWindows = [];
 let currentView = 'active';
-let sortBy = 'domain';
 
 document.addEventListener('DOMContentLoaded', () => {
   loadActiveWindows();
@@ -34,12 +33,7 @@ function setupEventListeners() {
     searchTabs(e.target.value);
   });
 
-  // Sort controls
-  document.getElementById('sortBy').addEventListener('change', (e) => {
-    sortBy = e.target.value;
-    applySorting();
-  });
-
+  // Sort button
   document.getElementById('executeSortBtn').addEventListener('click', () => {
     executeSortOnAllWindows();
   });
@@ -468,42 +462,18 @@ function setViewMode(mode) {
 }
 
 function sortTabs(tabs) {
+  // Always sort by domain
   return tabs.slice().sort((a, b) => {
-    let aValue, bValue;
-    
-    switch (sortBy) {
-      case 'title':
-        aValue = a.title.toLowerCase();
-        bValue = b.title.toLowerCase();
-        break;
-      case 'url':
-        aValue = a.url.toLowerCase();
-        bValue = b.url.toLowerCase();
-        break;
-      case 'domain':
-        aValue = new URL(a.url).hostname.toLowerCase();
-        bValue = new URL(b.url).hostname.toLowerCase();
-        break;
-      default:
-        return 0;
-    }
-    
+    const aValue = new URL(a.url).hostname.toLowerCase();
+    const bValue = new URL(b.url).hostname.toLowerCase();
     return aValue.localeCompare(bValue);
   });
 }
 
-function applySorting() {
-  if (currentView === 'active') {
-    renderActiveWindows();
-  } else if (currentView === 'saved') {
-    renderSavedWindows();
-  }
-}
 
 async function executeSortOnAllWindows() {
   chrome.runtime.sendMessage({ 
-    action: 'sortAllWindows', 
-    sortBy: sortBy
+    action: 'sortAllWindows'
   }, () => {
     // Refresh the display after sorting
     setTimeout(() => {
@@ -536,6 +506,8 @@ function groupTabsByDomain(tabs) {
   // Process domains with multiple tabs
   domainMap.forEach((tabList, domain) => {
     if (tabList.length >= 2) {
+      // Sort tabs within group by URL
+      tabList.sort((a, b) => a.url.toLowerCase().localeCompare(b.url.toLowerCase()));
       groups.push({
         domain: domain,
         tabs: tabList,
@@ -552,6 +524,8 @@ function groupTabsByDomain(tabs) {
   
   // Add other group if there are any other tabs
   if (otherTabs.length > 0) {
+    // Sort other tabs by URL
+    otherTabs.sort((a, b) => a.url.toLowerCase().localeCompare(b.url.toLowerCase()));
     groups.push({
       domain: 'other',
       tabs: otherTabs,
@@ -636,10 +610,8 @@ function createDomainGroupElement(group, windowId, isSaved) {
   const tabsListEl = document.createElement('div');
   tabsListEl.className = 'domain-tabs-list';
   
-  // Sort tabs within the group if needed
-  const sortedTabs = sortBy !== 'domain' ? sortTabs(group.tabs) : group.tabs;
-  
-  sortedTabs.forEach(tab => {
+  // Tabs are already sorted by URL within groups
+  group.tabs.forEach(tab => {
     const tabEl = createTabItem(tab, windowId, isSaved);
     tabsListEl.appendChild(tabEl);
   });
