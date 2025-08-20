@@ -1,6 +1,7 @@
 let currentWindows = [];
 let savedWindows = [];
 let currentView = 'active';
+let sortBy = 'domain';
 
 document.addEventListener('DOMContentLoaded', () => {
   loadActiveWindows();
@@ -33,6 +34,16 @@ function setupEventListeners() {
     searchTabs(e.target.value);
   });
 
+  // Sort controls
+  document.getElementById('sortBy').addEventListener('change', (e) => {
+    sortBy = e.target.value;
+    applySorting();
+  });
+
+  document.getElementById('executeSortBtn').addEventListener('click', () => {
+    executeSortOnAllWindows();
+  });
+
   // Settings
   document.getElementById('darkMode').addEventListener('change', (e) => {
     document.body.classList.toggle('dark-mode', e.target.checked);
@@ -44,6 +55,13 @@ function setupEventListeners() {
     if (result.darkMode) {
       document.getElementById('darkMode').checked = true;
       document.body.classList.add('dark-mode');
+    }
+  });
+
+  // Message listener for keyboard shortcuts
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'executeSort') {
+      executeSortOnAllWindows();
     }
   });
 }
@@ -205,7 +223,9 @@ function createWindowCard(window, index, isSaved) {
   const tabsContainer = document.createElement('div');
   tabsContainer.className = 'tabs-container';
   
-  window.tabs.forEach(tab => {
+  const tabsToRender = sortTabs(window.tabs);
+  
+  tabsToRender.forEach(tab => {
     const tabItem = createTabItem(tab, window.id, isSaved);
     tabsContainer.appendChild(tabItem);
   });
@@ -415,7 +435,7 @@ function searchTabs(query) {
     
     return {
       ...window,
-      tabs: filteredTabs
+      tabs: sortTabs(filteredTabs)
     };
   }).filter(window => window.tabs.length > 0);
   
@@ -454,3 +474,49 @@ function setViewMode(mode) {
     container.style.gap = '12px';
   }
 }
+
+function sortTabs(tabs) {
+  return tabs.slice().sort((a, b) => {
+    let aValue, bValue;
+    
+    switch (sortBy) {
+      case 'title':
+        aValue = a.title.toLowerCase();
+        bValue = b.title.toLowerCase();
+        break;
+      case 'url':
+        aValue = a.url.toLowerCase();
+        bValue = b.url.toLowerCase();
+        break;
+      case 'domain':
+        aValue = new URL(a.url).hostname.toLowerCase();
+        bValue = new URL(b.url).hostname.toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+    
+    return aValue.localeCompare(bValue);
+  });
+}
+
+function applySorting() {
+  if (currentView === 'active') {
+    renderActiveWindows();
+  } else if (currentView === 'saved') {
+    renderSavedWindows();
+  }
+}
+
+async function executeSortOnAllWindows() {
+  chrome.runtime.sendMessage({ 
+    action: 'sortAllWindows', 
+    sortBy: sortBy
+  }, () => {
+    // Refresh the display after sorting
+    setTimeout(() => {
+      loadActiveWindows();
+    }, 500);
+  });
+}
+

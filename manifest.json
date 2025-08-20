@@ -7,7 +7,8 @@
     "tabs",
     "windows",
     "storage",
-    "tabGroups"
+    "tabGroups",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -42,6 +43,13 @@
         "mac": "Command+Shift+F"
       },
       "description": "Search tabs"
+    },
+    "sort-tabs": {
+      "suggested_key": {
+        "default": "Ctrl+Comma",
+        "mac": "Command+Comma"
+      },
+      "description": "Sort tabs"
     }
   }
 }

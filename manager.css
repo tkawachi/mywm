@@ -168,6 +168,32 @@ body {
   color: white;
 }
 
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-controls select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fff;
+  color: #666;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.sort-controls select:focus {
+  border-color: #667eea;
+}
+
+.sort-controls select:hover {
+  border-color: #ccc;
+}
+
 .content-area {
   flex: 1;
   overflow-y: auto;
@@ -497,4 +523,29 @@ body.dark-mode .window-card {
 body.dark-mode .toolbar {
   background: #2a2a2a;
   border-bottom-color: #444;
+}
+
+body.dark-mode .sort-controls select {
+  background: #333;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+body.dark-mode .sort-controls select:hover {
+  border-color: #777;
+}
+
+body.dark-mode .sort-controls select:focus {
+  border-color: #667eea;
+}
+
+body.dark-mode .toolbar-btn {
+  background: #333;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+body.dark-mode .toolbar-btn:hover {
+  background: #444;
+  border-color: #666;
 }

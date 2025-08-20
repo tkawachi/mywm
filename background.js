@@ -13,8 +13,34 @@ chrome.commands.onCommand.addListener(async (command) => {
     await saveCurrentWindow();
   } else if (command === 'search-tabs') {
     chrome.action.openPopup();
+  } else if (command === 'sort-tabs') {
+    await sortCurrentWindow();
   }
 });
+
+async function sortCurrentWindow() {
+  try {
+    const currentWindow = await chrome.windows.getCurrent({ populate: true });
+    const sortedTabs = currentWindow.tabs.slice().sort((a, b) => {
+      const aValue = new URL(a.url).hostname.toLowerCase();
+      const bValue = new URL(b.url).hostname.toLowerCase();
+      return aValue.localeCompare(bValue);
+    });
+    
+    const sortedTabIds = sortedTabs.map(tab => tab.id);
+    await sortTabsInWindow(currentWindow.id, sortedTabIds);
+    
+    // Show notification
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icon48.png',
+      title: 'Tabs Sorted',
+      message: `Sorted ${sortedTabs.length} tabs by domain`
+    });
+  } catch (error) {
+    console.error('Error sorting current window:', error);
+  }
+}
 
 async function saveCurrentWindow() {
   const window = await chrome.windows.getCurrent({ populate: true });
@@ -60,6 +86,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.windows.update(request.windowId, { focused: true });
   } else if (request.action === 'moveTabToWindow') {
     chrome.tabs.move(request.tabId, { windowId: request.targetWindowId, index: -1 });
+  } else if (request.action === 'sortTabsInWindow') {
+    sortTabsInWindow(request.windowId, request.sortedTabIds);
+    return true;
+  } else if (request.action === 'sortAllWindows') {
+    sortAllWindows(request.sortBy, request.sortDirection);
+    return true;
   }
 });
 
@@ -115,4 +147,50 @@ async function restoreWindow(windowId) {
 function deleteSavedWindow(windowId) {
   savedWindows = savedWindows.filter(w => w.id !== windowId);
   chrome.storage.local.set({ savedWindows });
+}
+
+async function sortTabsInWindow(windowId, sortedTabIds) {
+  try {
+    for (let i = 0; i < sortedTabIds.length; i++) {
+      await chrome.tabs.move(sortedTabIds[i], { windowId: windowId, index: i });
+    }
+  } catch (error) {
+    console.error('Error sorting tabs:', error);
+  }
+}
+
+async function sortAllWindows(sortBy) {
+  try {
+    const windows = await chrome.windows.getAll({ populate: true });
+    
+    for (const window of windows) {
+      const sortedTabs = window.tabs.slice().sort((a, b) => {
+        let aValue, bValue;
+        
+        switch (sortBy) {
+          case 'title':
+            aValue = a.title.toLowerCase();
+            bValue = b.title.toLowerCase();
+            break;
+          case 'url':
+            aValue = a.url.toLowerCase();
+            bValue = b.url.toLowerCase();
+            break;
+          case 'domain':
+            aValue = new URL(a.url).hostname.toLowerCase();
+            bValue = new URL(b.url).hostname.toLowerCase();
+            break;
+          default:
+            return 0;
+        }
+        
+        return aValue.localeCompare(bValue);
+      });
+      
+      const sortedTabIds = sortedTabs.map(tab => tab.id);
+      await sortTabsInWindow(window.id, sortedTabIds);
+    }
+  } catch (error) {
+    console.error('Error sorting all windows:', error);
+  }
 }

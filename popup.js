@@ -1,6 +1,7 @@
 let currentWindows = [];
 let savedWindows = [];
 let searchTimeout;
+let sortBy = 'domain';
 
 document.addEventListener('DOMContentLoaded', () => {
   loadCurrentWindows();
@@ -28,6 +29,13 @@ function setupEventListeners() {
   document.getElementById('openManager').addEventListener('click', () => {
     chrome.tabs.create({ url: 'manager.html' });
     window.close();
+  });
+
+  // Sort controls
+  document.getElementById('sortBy').addEventListener('change', (e) => {
+    sortBy = e.target.value;
+    renderCurrentWindows();
+    renderSavedWindows();
   });
 }
 
@@ -162,7 +170,9 @@ function createWindowElement(window, index, isSaved) {
   const tabsListEl = document.createElement('div');
   tabsListEl.className = 'tabs-list';
   
-  window.tabs.forEach(tab => {
+  const tabsToRender = sortTabs(window.tabs);
+  
+  tabsToRender.forEach(tab => {
     const tabEl = createTabElement(tab, window.id, isSaved);
     tabsListEl.appendChild(tabEl);
   });
@@ -334,7 +344,8 @@ function searchTabs(query) {
       resultsEl.innerHTML = '<div class="empty-state">No matching tabs found</div>';
     } else {
       resultsEl.innerHTML = '';
-      tabs.forEach(tab => {
+      const sortedTabs = sortTabs(tabs);
+      sortedTabs.forEach(tab => {
         const resultEl = document.createElement('div');
         resultEl.className = 'search-result-item';
         
@@ -366,5 +377,30 @@ function searchTabs(query) {
     }
     
     resultsEl.classList.remove('hidden');
+  });
+}
+
+function sortTabs(tabs) {
+  return tabs.slice().sort((a, b) => {
+    let aValue, bValue;
+    
+    switch (sortBy) {
+      case 'title':
+        aValue = a.title.toLowerCase();
+        bValue = b.title.toLowerCase();
+        break;
+      case 'url':
+        aValue = a.url.toLowerCase();
+        bValue = b.url.toLowerCase();
+        break;
+      case 'domain':
+        aValue = new URL(a.url).hostname.toLowerCase();
+        bValue = new URL(b.url).hostname.toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+    
+    return aValue.localeCompare(bValue);
   });
 }
