@@ -549,3 +549,172 @@ body.dark-mode .toolbar-btn:hover {
   background: #444;
   border-color: #666;
 }
+
+/* Domain group styles */
+.domain-group {
+  margin-bottom: 8px;
+  background: #f9f9f9;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.domain-group-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.domain-group-header:hover {
+  background: #efefef;
+}
+
+.domain-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.domain-favicon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 3px;
+}
+
+.domain-icon-placeholder {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.domain-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #444;
+}
+
+.domain-tab-count {
+  font-size: 13px;
+  color: #777;
+  margin-right: 10px;
+}
+
+.domain-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 8px;
+}
+
+.domain-close-all {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 3px;
+  color: #e53e3e;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.domain-close-all:hover {
+  background: #fed7d7;
+  border-color: #fc8181;
+}
+
+.expand-indicator {
+  font-size: 12px;
+  color: #777;
+  transition: transform 0.2s;
+}
+
+.domain-tabs-list {
+  padding: 0;
+  max-height: 500px;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.domain-tabs-list.collapsed {
+  max-height: 0;
+  overflow: hidden;
+}
+
+.domain-tabs-list .tab-item {
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  margin: 0;
+}
+
+.domain-tabs-list .tab-item:hover {
+  background: #f8f9fa;
+}
+
+.domain-tabs-list .tab-item:last-child {
+  border-bottom: none;
+}
+
+/* Dark mode support for domain groups */
+body.dark-mode .domain-group {
+  background: #333;
+  border-color: #555;
+}
+
+body.dark-mode .domain-group-header {
+  background: #3a3a3a;
+  border-bottom-color: #555;
+}
+
+body.dark-mode .domain-group-header:hover {
+  background: #404040;
+}
+
+body.dark-mode .domain-name {
+  color: #e0e0e0;
+}
+
+body.dark-mode .domain-tab-count {
+  color: #999;
+}
+
+body.dark-mode .expand-indicator {
+  color: #999;
+}
+
+body.dark-mode .domain-tabs-list {
+  background: #2a2a2a;
+}
+
+body.dark-mode .domain-tabs-list .tab-item {
+  background: #2a2a2a;
+  border-bottom-color: #444;
+}
+
+body.dark-mode .domain-tabs-list .tab-item:hover {
+  background: #333;
+}
+
+body.dark-mode .domain-close-all {
+  background: #444;
+  border-color: #666;
+  color: #fc8181;
+}
+
+body.dark-mode .domain-close-all:hover {
+  background: #5a2828;
+  border-color: #fc8181;
+}

@@ -223,11 +223,13 @@ function createWindowCard(window, index, isSaved) {
   const tabsContainer = document.createElement('div');
   tabsContainer.className = 'tabs-container';
   
-  const tabsToRender = sortTabs(window.tabs);
+  // Group tabs by domain
+  const domainGroups = groupTabsByDomain(window.tabs);
   
-  tabsToRender.forEach(tab => {
-    const tabItem = createTabItem(tab, window.id, isSaved);
-    tabsContainer.appendChild(tabItem);
+  // Render each domain group
+  domainGroups.forEach(group => {
+    const groupEl = createDomainGroupElement(group, window.id, isSaved);
+    tabsContainer.appendChild(groupEl);
   });
   
   card.appendChild(header);
@@ -291,15 +293,6 @@ function createTabItem(tab, windowId, isSaved) {
   actions.className = 'tab-actions';
   
   if (!isSaved) {
-    const focusBtn = document.createElement('button');
-    focusBtn.className = 'tab-action';
-    focusBtn.textContent = 'Focus';
-    focusBtn.onclick = (e) => {
-      e.stopPropagation();
-      chrome.tabs.update(tab.id, { active: true });
-      chrome.windows.update(windowId, { focused: true });
-    };
-    
     const closeBtn = document.createElement('button');
     closeBtn.className = 'tab-action close';
     closeBtn.textContent = '✕';
@@ -309,7 +302,6 @@ function createTabItem(tab, windowId, isSaved) {
       loadActiveWindows();
     };
     
-    actions.appendChild(focusBtn);
     actions.appendChild(closeBtn);
   }
   
@@ -518,5 +510,156 @@ async function executeSortOnAllWindows() {
       loadActiveWindows();
     }, 500);
   });
+}
+
+function groupTabsByDomain(tabs) {
+  const domainMap = new Map();
+  const otherTabs = [];
+  
+  tabs.forEach(tab => {
+    try {
+      const url = new URL(tab.url);
+      const domain = url.hostname || 'other';
+      
+      if (!domainMap.has(domain)) {
+        domainMap.set(domain, []);
+      }
+      domainMap.get(domain).push(tab);
+    } catch (e) {
+      // Invalid URL, add to other
+      otherTabs.push(tab);
+    }
+  });
+  
+  const groups = [];
+  
+  // Process domains with multiple tabs
+  domainMap.forEach((tabList, domain) => {
+    if (tabList.length >= 2) {
+      groups.push({
+        domain: domain,
+        tabs: tabList,
+        isGroup: true
+      });
+    } else {
+      // Single tab domains go to other
+      otherTabs.push(...tabList);
+    }
+  });
+  
+  // Sort groups by domain name
+  groups.sort((a, b) => a.domain.localeCompare(b.domain));
+  
+  // Add other group if there are any other tabs
+  if (otherTabs.length > 0) {
+    groups.push({
+      domain: 'other',
+      tabs: otherTabs,
+      isGroup: true
+    });
+  }
+  
+  return groups;
+}
+
+function createDomainGroupElement(group, windowId, isSaved) {
+  const groupEl = document.createElement('div');
+  groupEl.className = 'domain-group';
+  
+  // Create group header
+  const headerEl = document.createElement('div');
+  headerEl.className = 'domain-group-header';
+  headerEl.onclick = (e) => {
+    if (!e.target.classList.contains('domain-close-all')) {
+      toggleDomainGroupExpand(groupEl);
+    }
+  };
+  
+  // Domain icon and name
+  const domainInfoEl = document.createElement('div');
+  domainInfoEl.className = 'domain-info';
+  
+  // Get favicon from first tab
+  if (group.tabs[0].favIconUrl && group.domain !== 'other') {
+    const favicon = document.createElement('img');
+    favicon.className = 'domain-favicon';
+    favicon.src = group.tabs[0].favIconUrl;
+    favicon.onerror = () => { favicon.style.display = 'none'; };
+    domainInfoEl.appendChild(favicon);
+  } else {
+    const icon = document.createElement('div');
+    icon.className = 'domain-icon-placeholder';
+    icon.textContent = group.domain === 'other' ? '📂' : '🌐';
+    domainInfoEl.appendChild(icon);
+  }
+  
+  const domainNameEl = document.createElement('span');
+  domainNameEl.className = 'domain-name';
+  domainNameEl.textContent = group.domain;
+  domainInfoEl.appendChild(domainNameEl);
+  
+  // Tab count
+  const tabCountEl = document.createElement('span');
+  tabCountEl.className = 'domain-tab-count';
+  tabCountEl.textContent = `(${group.tabs.length})`;
+  
+  // Actions container
+  const actionsEl = document.createElement('div');
+  actionsEl.className = 'domain-actions';
+  
+  // Close all tabs button (only for non-saved windows)
+  if (!isSaved) {
+    const closeAllBtn = document.createElement('button');
+    closeAllBtn.className = 'domain-close-all';
+    closeAllBtn.textContent = '✕';
+    closeAllBtn.title = 'Close all tabs in this group';
+    closeAllBtn.onclick = (e) => {
+      e.stopPropagation();
+      const tabIds = group.tabs.map(tab => tab.id);
+      chrome.tabs.remove(tabIds);
+      setTimeout(() => loadActiveWindows(), 100);
+    };
+    actionsEl.appendChild(closeAllBtn);
+  }
+  
+  // Expand/collapse indicator
+  const expandEl = document.createElement('span');
+  expandEl.className = 'expand-indicator';
+  expandEl.textContent = '▼';
+  
+  headerEl.appendChild(domainInfoEl);
+  headerEl.appendChild(tabCountEl);
+  headerEl.appendChild(actionsEl);
+  headerEl.appendChild(expandEl);
+  
+  // Create tabs container
+  const tabsListEl = document.createElement('div');
+  tabsListEl.className = 'domain-tabs-list';
+  
+  // Sort tabs within the group if needed
+  const sortedTabs = sortBy !== 'domain' ? sortTabs(group.tabs) : group.tabs;
+  
+  sortedTabs.forEach(tab => {
+    const tabEl = createTabItem(tab, windowId, isSaved);
+    tabsListEl.appendChild(tabEl);
+  });
+  
+  groupEl.appendChild(headerEl);
+  groupEl.appendChild(tabsListEl);
+  
+  return groupEl;
+}
+
+function toggleDomainGroupExpand(groupEl) {
+  const tabsList = groupEl.querySelector('.domain-tabs-list');
+  const indicator = groupEl.querySelector('.expand-indicator');
+  
+  if (tabsList.classList.contains('collapsed')) {
+    tabsList.classList.remove('collapsed');
+    indicator.textContent = '▼';
+  } else {
+    tabsList.classList.add('collapsed');
+    indicator.textContent = '▶';
+  }
 }
 

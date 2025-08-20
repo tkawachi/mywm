@@ -170,11 +170,13 @@ function createWindowElement(window, index, isSaved) {
   const tabsListEl = document.createElement('div');
   tabsListEl.className = 'tabs-list';
   
-  const tabsToRender = sortTabs(window.tabs);
+  // Group tabs by domain
+  const domainGroups = groupTabsByDomain(window.tabs);
   
-  tabsToRender.forEach(tab => {
-    const tabEl = createTabElement(tab, window.id, isSaved);
-    tabsListEl.appendChild(tabEl);
+  // Render each domain group
+  domainGroups.forEach(group => {
+    const groupEl = createDomainGroupElement(group, window.id, isSaved);
+    tabsListEl.appendChild(groupEl);
   });
   
   windowEl.appendChild(headerEl);
@@ -403,4 +405,126 @@ function sortTabs(tabs) {
     
     return aValue.localeCompare(bValue);
   });
+}
+
+function groupTabsByDomain(tabs) {
+  const domainMap = new Map();
+  const otherTabs = [];
+  
+  tabs.forEach(tab => {
+    try {
+      const url = new URL(tab.url);
+      const domain = url.hostname || 'other';
+      
+      if (!domainMap.has(domain)) {
+        domainMap.set(domain, []);
+      }
+      domainMap.get(domain).push(tab);
+    } catch (e) {
+      // Invalid URL, add to other
+      otherTabs.push(tab);
+    }
+  });
+  
+  const groups = [];
+  
+  // Process domains with multiple tabs
+  domainMap.forEach((tabList, domain) => {
+    if (tabList.length >= 2) {
+      groups.push({
+        domain: domain,
+        tabs: tabList,
+        isGroup: true
+      });
+    } else {
+      // Single tab domains go to other
+      otherTabs.push(...tabList);
+    }
+  });
+  
+  // Sort groups by domain name
+  groups.sort((a, b) => a.domain.localeCompare(b.domain));
+  
+  // Add other group if there are any other tabs
+  if (otherTabs.length > 0) {
+    groups.push({
+      domain: 'other',
+      tabs: otherTabs,
+      isGroup: true
+    });
+  }
+  
+  return groups;
+}
+
+function createDomainGroupElement(group, windowId, isSaved) {
+  const groupEl = document.createElement('div');
+  groupEl.className = 'domain-group';
+  
+  // Create group header
+  const headerEl = document.createElement('div');
+  headerEl.className = 'domain-group-header';
+  headerEl.onclick = () => toggleDomainGroupExpand(groupEl);
+  
+  // Domain icon and name
+  const domainInfoEl = document.createElement('div');
+  domainInfoEl.className = 'domain-info';
+  
+  // Get favicon from first tab
+  if (group.tabs[0].favIconUrl && group.domain !== 'other') {
+    const favicon = document.createElement('img');
+    favicon.className = 'domain-favicon';
+    favicon.src = group.tabs[0].favIconUrl;
+    favicon.onerror = () => { favicon.style.display = 'none'; };
+    domainInfoEl.appendChild(favicon);
+  }
+  
+  const domainNameEl = document.createElement('span');
+  domainNameEl.className = 'domain-name';
+  domainNameEl.textContent = group.domain;
+  domainInfoEl.appendChild(domainNameEl);
+  
+  // Tab count
+  const tabCountEl = document.createElement('span');
+  tabCountEl.className = 'domain-tab-count';
+  tabCountEl.textContent = `(${group.tabs.length})`;
+  
+  // Expand/collapse indicator
+  const expandEl = document.createElement('span');
+  expandEl.className = 'expand-indicator';
+  expandEl.textContent = '▼';
+  
+  headerEl.appendChild(domainInfoEl);
+  headerEl.appendChild(tabCountEl);
+  headerEl.appendChild(expandEl);
+  
+  // Create tabs container
+  const tabsContainer = document.createElement('div');
+  tabsContainer.className = 'domain-tabs-list';
+  
+  // Sort tabs within the group if needed
+  const sortedTabs = sortBy !== 'domain' ? sortTabs(group.tabs) : group.tabs;
+  
+  sortedTabs.forEach(tab => {
+    const tabEl = createTabElement(tab, windowId, isSaved);
+    tabsContainer.appendChild(tabEl);
+  });
+  
+  groupEl.appendChild(headerEl);
+  groupEl.appendChild(tabsContainer);
+  
+  return groupEl;
+}
+
+function toggleDomainGroupExpand(groupEl) {
+  const tabsList = groupEl.querySelector('.domain-tabs-list');
+  const indicator = groupEl.querySelector('.expand-indicator');
+  
+  if (tabsList.classList.contains('collapsed')) {
+    tabsList.classList.remove('collapsed');
+    indicator.textContent = '▼';
+  } else {
+    tabsList.classList.add('collapsed');
+    indicator.textContent = '▶';
+  }
 }
