@@ -29,6 +29,8 @@ function setupEventListeners() {
     } else if (message.action === 'autoRefresh') {
       refresh();
     }
+    // Return false to indicate synchronous response (no async callback needed)
+    return false;
   });
 }
 
