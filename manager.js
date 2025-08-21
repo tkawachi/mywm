@@ -87,20 +87,18 @@ function createWindowCard(window, index) {
   const actions = document.createElement('div');
   actions.className = 'window-actions';
   
-  if (currentWindows.length > 1 && !window.focused) {
-    const focusBtn = createActionButton('Focus', '', () => {
-      chrome.windows.update(window.id, { focused: true });
-      loadActiveWindows();
-    });
-    
-    const closeBtn = createActionButton('Close', 'danger', () => {
-      chrome.windows.remove(window.id);
-      loadActiveWindows();
-    });
-    
-    actions.appendChild(focusBtn);
-    actions.appendChild(closeBtn);
-  }
+  // Show close button for all windows (including active/focused windows)
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'action-btn close-icon';
+  closeBtn.innerHTML = '×';
+  closeBtn.title = 'Close window';
+  closeBtn.onclick = (e) => {
+    e.stopPropagation();
+    chrome.windows.remove(window.id);
+    loadActiveWindows();
+  };
+  
+  actions.appendChild(closeBtn);
   
   meta.appendChild(tabCount);
   meta.appendChild(tabLabel);

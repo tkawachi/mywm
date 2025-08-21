@@ -252,6 +252,27 @@ body {
   border-color: #fc8181;
 }
 
+.action-btn.close-icon {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.action-btn.close-icon:hover {
+  background: rgba(229, 62, 62, 0.1);
+  color: #e53e3e;
+}
+
 .tabs-container {
   flex: 1;
   overflow-y: auto;
