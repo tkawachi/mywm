@@ -129,12 +129,6 @@ function createTabItem(tab, windowId) {
   const item = document.createElement('div');
   item.className = 'tab-item';
   
-  const checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
-  checkbox.className = 'tab-checkbox';
-  checkbox.dataset.tabId = tab.id;
-  checkbox.dataset.windowId = windowId;
-  
   const favicon = document.createElement('div');
   favicon.className = 'tab-favicon';
   
@@ -173,8 +167,6 @@ function createTabItem(tab, windowId) {
   
   const indicators = document.createElement('div');
   indicators.className = 'tab-indicators';
-  
-  item.appendChild(checkbox);
   
   if (tab.pinned) {
     const pinned = document.createElement('div');
