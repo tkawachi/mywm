@@ -111,7 +111,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 async function getAllWindows() {
   const windows = await chrome.windows.getAll({ populate: true });
-  return windows.map(window => ({
+  // Filter out Picture-in-Picture windows (which are always on top)
+  const filteredWindows = windows.filter(window => !window.alwaysOnTop);
+  return filteredWindows.map(window => ({
     id: window.id,
     focused: window.focused,
     tabs: window.tabs.map(tab => ({
@@ -144,6 +146,9 @@ async function sortAllWindows() {
     const windows = await chrome.windows.getAll({ populate: true });
     
     for (const window of windows) {
+      // Skip Picture-in-Picture windows
+      if (window.alwaysOnTop) continue;
+      
       // Always sort by domain
       const sortedTabs = window.tabs.slice().sort((a, b) => {
         const aValue = new URL(a.url).hostname.toLowerCase();

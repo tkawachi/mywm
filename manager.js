@@ -240,12 +240,14 @@ function refresh() {
 
 async function mergeAllWindows() {
   const windows = await chrome.windows.getAll({ populate: true });
-  if (windows.length <= 1) return;
+  // Filter out Picture-in-Picture windows
+  const filteredWindows = windows.filter(window => !window.alwaysOnTop);
+  if (filteredWindows.length <= 1) return;
   
   const currentWindow = await chrome.windows.getCurrent();
   const tabIds = [];
   
-  windows.forEach(window => {
+  filteredWindows.forEach(window => {
     if (window.id !== currentWindow.id) {
       window.tabs.forEach(tab => {
         tabIds.push(tab.id);
