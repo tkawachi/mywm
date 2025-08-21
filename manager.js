@@ -28,6 +28,11 @@ function setupEventListeners() {
   document.getElementById('executeSortBtn').addEventListener('click', () => {
     executeSortOnAllWindows();
   });
+  
+  // Remove duplicates button
+  document.getElementById('removeDuplicatesBtn').addEventListener('click', () => {
+    removeAllDuplicates();
+  });
 
   // Settings
   document.getElementById('darkMode').addEventListener('change', (e) => {
@@ -463,5 +468,18 @@ function toggleDomainGroupExpand(groupEl) {
     tabsList.classList.add('collapsed');
     indicator.textContent = '▶';
   }
+}
+
+async function removeAllDuplicates() {
+  chrome.runtime.sendMessage({ 
+    action: 'removeDuplicates'
+  }, (result) => {
+    if (result && result.removedCount > 0) {
+      // Refresh the display after removing duplicates
+      setTimeout(() => {
+        loadActiveWindows();
+      }, 500);
+    }
+  });
 }
 

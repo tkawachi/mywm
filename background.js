@@ -103,6 +103,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === 'sortAllWindows') {
     sortAllWindows();
     return true;
+  } else if (request.action === 'removeDuplicates') {
+    removeDuplicateTabs().then(result => sendResponse(result));
+    return true;
   }
 });
 
@@ -153,5 +156,53 @@ async function sortAllWindows() {
     }
   } catch (error) {
     console.error('Error sorting all windows:', error);
+  }
+}
+
+async function removeDuplicateTabs() {
+  try {
+    const windows = await chrome.windows.getAll({ populate: true });
+    const urlMap = new Map();
+    const tabsToClose = [];
+    
+    // Collect all tabs and track duplicates
+    for (const window of windows) {
+      for (const tab of window.tabs) {
+        const url = tab.url;
+        
+        if (urlMap.has(url)) {
+          // Found duplicate - keep the first one, mark others for removal
+          const existingTab = urlMap.get(url);
+          
+          // Prefer active tab over inactive tab
+          if (tab.active && !existingTab.active) {
+            tabsToClose.push(existingTab.id);
+            urlMap.set(url, tab);
+          } else {
+            tabsToClose.push(tab.id);
+          }
+        } else {
+          urlMap.set(url, tab);
+        }
+      }
+    }
+    
+    // Close duplicate tabs
+    if (tabsToClose.length > 0) {
+      await chrome.tabs.remove(tabsToClose);
+      
+      // Show notification
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icon48.png',
+        title: 'Duplicates Removed',
+        message: `Removed ${tabsToClose.length} duplicate tab${tabsToClose.length !== 1 ? 's' : ''}`
+      });
+    }
+    
+    return { removedCount: tabsToClose.length };
+  } catch (error) {
+    console.error('Error removing duplicate tabs:', error);
+    return { error: error.message };
   }
 }
