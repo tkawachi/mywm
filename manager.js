@@ -71,7 +71,6 @@ function createWindowCard(window, index) {
   
   const header = document.createElement('div');
   header.className = 'window-header';
-  header.onclick = () => toggleWindowExpand(card);
   
   const title = document.createElement('div');
   title.className = 'window-title';
@@ -113,7 +112,7 @@ function createWindowCard(window, index) {
   header.appendChild(meta);
   
   const tabsContainer = document.createElement('div');
-  tabsContainer.className = 'tabs-container expanded';
+  tabsContainer.className = 'tabs-container';
   
   // Group tabs by domain
   const domainGroups = groupTabsByDomain(window.tabs);
@@ -231,10 +230,6 @@ function createActionButton(text, className, onClick) {
   return btn;
 }
 
-function toggleWindowExpand(card) {
-  const container = card.querySelector('.tabs-container');
-  container.classList.toggle('expanded');
-}
 
 function updateWindowCount() {
   const count = currentWindows.length;
