@@ -7,36 +7,6 @@
 </head>
 <body>
   <div class="app-container">
-    <aside class="sidebar">
-      <div class="logo">
-        <div class="logo-icon">WM</div>
-        <span class="logo-text">MyWM</span>
-      </div>
-      
-      
-      <nav class="nav-menu">
-        <a href="#" class="nav-item active" data-view="active">
-          <span class="nav-icon">⚡</span>
-          <span class="nav-text">Active Windows</span>
-        </a>
-      </nav>
-      
-      <div class="sidebar-footer">
-        <a href="#" class="nav-item" data-view="settings">
-          <span class="nav-icon">⚙️</span>
-          <span class="nav-text">Settings</span>
-        </a>
-        <a href="#" class="nav-item" data-view="help">
-          <span class="nav-icon">❓</span>
-          <span class="nav-text">Help</span>
-        </a>
-        <a href="#" class="nav-item" data-view="about">
-          <span class="nav-icon">ℹ️</span>
-          <span class="nav-text">About</span>
-        </a>
-      </div>
-    </aside>
-    
     <main class="main-content">
       <div class="toolbar">
         <div class="toolbar-left">
@@ -84,61 +54,13 @@
               <rect x="6" y="8" width="12" height="8" fill="none"/>
             </svg>
           </button>
-          <button class="toolbar-btn" id="settingsBtn" title="Settings">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 7.76l4.24 4.24m12.44 0l4.24 4.24M1.54 16.24l4.24-4.24"/>
-            </svg>
-          </button>
         </div>
       </div>
       
-      <div class="content-area" id="activeView">
-        <div class="windows-container" id="windowsList">
-          <!-- Windows will be rendered here -->
-        </div>
+      <div class="windows-container" id="windowsList">
+        <!-- Windows will be rendered here -->
       </div>
       
-      
-      <div class="content-area hidden" id="settingsView">
-        <div class="settings-container">
-          <h2>Settings</h2>
-          <div class="setting-group">
-            <label>
-              <input type="checkbox" id="darkMode"> Dark Mode
-            </label>
-          </div>
-          <div class="setting-group">
-            <label>
-              <input type="checkbox" id="showFavicons"> Show favicons
-            </label>
-          </div>
-        </div>
-      </div>
-      
-      <div class="content-area hidden" id="helpView">
-        <div class="help-container">
-          <h2>Help</h2>
-          <h3>Keyboard Shortcuts</h3>
-          <ul>
-            <li><kbd>Cmd/Ctrl + ,</kbd> - Sort tabs</li>
-          </ul>
-          <h3>Features</h3>
-          <ul>
-            <li>Manage all open windows and tabs</li>
-            <li>Merge multiple windows</li>
-          </ul>
-        </div>
-      </div>
-      
-      <div class="content-area hidden" id="aboutView">
-        <div class="about-container">
-          <h2>About MyWM</h2>
-          <p>Version 1.0.0</p>
-          <p>A powerful window and tab manager for Chrome</p>
-          <p>Inspired by Cluster - Window & Tab Manager</p>
-        </div>
-      </div>
     </main>
   </div>
   

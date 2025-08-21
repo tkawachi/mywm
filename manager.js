@@ -1,5 +1,4 @@
 let currentWindows = [];
-let currentView = 'active';
 
 document.addEventListener('DOMContentLoaded', () => {
   loadActiveWindows();
@@ -8,16 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
-  // Navigation
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      const view = e.currentTarget.dataset.view;
-      if (view) {
-        switchView(view);
-      }
-    });
-  });
 
   // Toolbar buttons (refresh button removed - auto-refresh is now enabled)
   document.getElementById('mergeAllBtn').addEventListener('click', mergeAllWindows);
@@ -34,19 +23,6 @@ function setupEventListeners() {
     removeAllDuplicates();
   });
 
-  // Settings
-  document.getElementById('darkMode').addEventListener('change', (e) => {
-    document.body.classList.toggle('dark-mode', e.target.checked);
-    chrome.storage.local.set({ darkMode: e.target.checked });
-  });
-
-  // Load settings
-  chrome.storage.local.get(['darkMode'], (result) => {
-    if (result.darkMode) {
-      document.getElementById('darkMode').checked = true;
-      document.body.classList.add('dark-mode');
-    }
-  });
 
   // Message listener for keyboard shortcuts and auto-refresh
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -58,28 +34,6 @@ function setupEventListeners() {
   });
 }
 
-function switchView(view) {
-  currentView = view;
-  
-  // Update navigation
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.toggle('active', item.dataset.view === view);
-  });
-  
-  // Update content
-  document.querySelectorAll('.content-area').forEach(area => {
-    area.classList.add('hidden');
-  });
-  
-  const viewElement = document.getElementById(`${view}View`);
-  if (viewElement) {
-    viewElement.classList.remove('hidden');
-  }
-  
-  if (view === 'active') {
-    loadActiveWindows();
-  }
-}
 
 async function loadActiveWindows() {
   chrome.runtime.sendMessage({ action: 'getAllWindows' }, (windows) => {
@@ -255,9 +209,7 @@ function updateWindowCount() {
 }
 
 function refresh() {
-  if (currentView === 'active') {
-    loadActiveWindows();
-  }
+  loadActiveWindows();
 }
 
 async function mergeAllWindows() {
