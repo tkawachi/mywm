@@ -41,21 +41,23 @@
           <span id="windowCount">0 windows</span>
         </div>
         <div class="toolbar-right">
-          <button class="toolbar-btn" id="executeSortBtn" title="Sort by Domain (Cmd+,)">
+          <button class="toolbar-btn" id="executeSortBtn" title="Sort tabs by domain in all windows (Cmd+,)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 6h18M7 12h10M11 18h2"/>
               <path d="m8 10 4 4 4-4"/>
             </svg>
+            <span class="btn-label">Sort</span>
           </button>
-          <button class="toolbar-btn" id="removeDuplicatesBtn" title="Remove Duplicate Tabs">
+          <button class="toolbar-btn" id="removeDuplicatesBtn" title="Remove duplicate tabs across all windows">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="4" y="4" width="8" height="8"/>
               <rect x="12" y="12" width="8" height="8"/>
               <path d="M8 8l8 8"/>
               <path d="M16 8l-8 8"/>
             </svg>
+            <span class="btn-label">Dedup</span>
           </button>
-          <button class="toolbar-btn" id="mergeAllBtn" title="Merge All Windows">
+          <button class="toolbar-btn" id="mergeAllBtn" title="Merge all windows into one">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 10l4-4l-4-4"/>
               <path d="M6 14l-4 4l4 4"/>
@@ -63,6 +65,7 @@
               <path d="M2 18h8"/>
               <rect x="6" y="8" width="12" height="8" fill="none"/>
             </svg>
+            <span class="btn-label">Merge</span>
           </button>
         </div>
       </div>
