@@ -10,6 +10,34 @@
     <main class="main-content">
       <div class="toolbar">
         <div class="toolbar-left">
+          <div class="app-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="7" height="7" rx="1.5" fill="url(#gradient1)" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" fill="url(#gradient2)" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" fill="url(#gradient3)" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" fill="url(#gradient4)" />
+              <defs>
+                <linearGradient id="gradient1" x1="3" y1="3" x2="10" y2="10">
+                  <stop stop-color="#667eea" />
+                  <stop offset="1" stop-color="#764ba2" />
+                </linearGradient>
+                <linearGradient id="gradient2" x1="14" y1="3" x2="21" y2="10">
+                  <stop stop-color="#764ba2" />
+                  <stop offset="1" stop-color="#667eea" />
+                </linearGradient>
+                <linearGradient id="gradient3" x1="3" y1="14" x2="10" y2="21">
+                  <stop stop-color="#667eea" />
+                  <stop offset="1" stop-color="#a855f7" />
+                </linearGradient>
+                <linearGradient id="gradient4" x1="14" y1="14" x2="21" y2="21">
+                  <stop stop-color="#a855f7" />
+                  <stop offset="1" stop-color="#667eea" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <span class="app-title">MyWM</span>
+          <span class="divider">|</span>
           <span id="windowCount">0 windows</span>
         </div>
         <div class="toolbar-right">
