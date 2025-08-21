@@ -267,6 +267,7 @@ body {
   display: flex;
   gap: 8px;
   margin-right: 10px;
+  align-items: center;
 }
 
 .indicator {
@@ -285,6 +286,34 @@ body {
 
 .indicator.pinned {
   background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23667eea"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>') center/contain no-repeat;
+}
+
+.tab-close-btn {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 3px;
+  color: #999;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tab-item:hover .tab-close-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tab-close-btn:hover {
+  background: #fed7d7;
+  border-color: #fc8181;
+  color: #e53e3e;
 }
 
 
@@ -580,4 +609,16 @@ body.dark-mode .domain-close-all {
 body.dark-mode .domain-close-all:hover {
   background: #5a2828;
   border-color: #fc8181;
+}
+
+body.dark-mode .tab-close-btn {
+  background: #444;
+  border-color: #666;
+  color: #999;
+}
+
+body.dark-mode .tab-close-btn:hover {
+  background: #5a2828;
+  border-color: #fc8181;
+  color: #fc8181;
 }

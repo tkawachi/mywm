@@ -174,6 +174,20 @@ function createTabItem(tab, windowId) {
     indicators.appendChild(audio);
   }
   
+  // Add close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'tab-close-btn';
+  closeBtn.textContent = '✕';
+  closeBtn.title = 'Close tab';
+  closeBtn.onclick = (e) => {
+    e.stopPropagation();
+    chrome.runtime.sendMessage({ 
+      action: 'closeTab', 
+      tabId: tab.id 
+    });
+  };
+  indicators.appendChild(closeBtn);
+  
   item.appendChild(info);
   item.appendChild(indicators);
   
