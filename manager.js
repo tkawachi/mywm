@@ -24,11 +24,6 @@ function setupEventListeners() {
   document.getElementById('listViewBtn').addEventListener('click', () => setViewMode('list'));
   document.getElementById('gridViewBtn').addEventListener('click', () => setViewMode('grid'));
   
-  // Global search
-  document.getElementById('globalSearch').addEventListener('input', (e) => {
-    searchTabs(e.target.value);
-  });
-
   // Sort button
   document.getElementById('executeSortBtn').addEventListener('click', () => {
     executeSortOnAllWindows();
@@ -281,46 +276,6 @@ async function mergeAllWindows() {
   }
 }
 
-
-function searchTabs(query) {
-  if (!query) {
-    if (currentView === 'active') {
-      renderActiveWindows();
-    }
-    return;
-  }
-  
-  const filteredWindows = currentWindows.map(window => {
-    const filteredTabs = window.tabs.filter(tab => 
-      tab.title.toLowerCase().includes(query.toLowerCase()) ||
-      tab.url.toLowerCase().includes(query.toLowerCase())
-    );
-    
-    return {
-      ...window,
-      tabs: sortTabs(filteredTabs)
-    };
-  }).filter(window => window.tabs.length > 0);
-  
-  const container = document.getElementById('windowsList');
-  
-  if (filteredWindows.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <h3>No matching tabs</h3>
-        <p>Try a different search term</p>
-      </div>
-    `;
-    return;
-  }
-  
-  container.innerHTML = '';
-  
-  filteredWindows.forEach((window, index) => {
-    const windowCard = createWindowCard(window, index);
-    container.appendChild(windowCard);
-  });
-}
 
 function setViewMode(mode) {
   document.getElementById('listViewBtn').classList.toggle('active', mode === 'list');

@@ -54,9 +54,7 @@ chrome.action.onClicked.addListener(() => {
 });
 
 chrome.commands.onCommand.addListener(async (command) => {
-  if (command === 'search-tabs') {
-    await openOrFocusManager();
-  } else if (command === 'sort-tabs') {
+  if (command === 'sort-tabs') {
     await sortCurrentWindow();
   } else if (command === 'open-manager') {
     await openOrFocusManager();
@@ -92,9 +90,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'getAllWindows') {
     getAllWindows().then(windows => sendResponse(windows));
     return true;
-  } else if (request.action === 'searchTabs') {
-    searchTabs(request.query).then(tabs => sendResponse(tabs));
-    return true;
   } else if (request.action === 'closeTab') {
     chrome.tabs.remove(request.tabId);
   } else if (request.action === 'focusTab') {
@@ -128,28 +123,6 @@ async function getAllWindows() {
       pinned: tab.pinned
     }))
   }));
-}
-
-async function searchTabs(query) {
-  const windows = await chrome.windows.getAll({ populate: true });
-  const allTabs = [];
-  
-  windows.forEach(window => {
-    window.tabs.forEach(tab => {
-      if (tab.title.toLowerCase().includes(query.toLowerCase()) ||
-          tab.url.toLowerCase().includes(query.toLowerCase())) {
-        allTabs.push({
-          id: tab.id,
-          windowId: window.id,
-          title: tab.title,
-          url: tab.url,
-          favIconUrl: tab.favIconUrl
-        });
-      }
-    });
-  });
-  
-  return allTabs;
 }
 
 

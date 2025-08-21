@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 MyWM is a Chrome extension (Manifest V3) for window and tab management. The extension provides:
 - Window and tab organization with save/restore functionality
-- Tab search and sorting capabilities
+- Tab sorting capabilities
 - Multiple UI views (popup and full manager page)
 - Keyboard shortcuts for common operations
 
@@ -17,13 +17,12 @@ MyWM is a Chrome extension (Manifest V3) for window and tab management. The exte
 1. **Background Service Worker** (`background.js`)
    - Central message handler for all extension operations
    - Manages saved windows state via Chrome Storage API
-   - Handles keyboard shortcuts (save-window, search-tabs, sort-tabs)
+   - Handles keyboard shortcuts (sort-tabs, open-manager)
    - Coordinates tab/window manipulation operations
 
 2. **Popup Interface** (`popup.js`, `popup.html`, `popup.css`)
    - Quick access interface from browser toolbar
    - Two tabs: Current Windows and Saved Windows
-   - Search functionality with real-time filtering
    - Window save/restore and tab management
 
 3. **Manager Page** (`manager.js`, `manager.html`, `manager.css`)
@@ -37,7 +36,7 @@ MyWM is a Chrome extension (Manifest V3) for window and tab management. The exte
 All operations flow through the background script via Chrome's message passing:
 - UI components send messages with `chrome.runtime.sendMessage`
 - Background script processes requests and returns responses
-- Actions include: `getAllWindows`, `searchTabs`, `saveWindow`, `restoreWindow`, `sortTabsInWindow`, etc.
+- Actions include: `getAllWindows`, `sortTabsInWindow`, etc.
 
 ### Data Persistence
 

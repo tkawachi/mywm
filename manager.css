@@ -53,25 +53,6 @@ body {
   color: #333;
 }
 
-.search-box {
-  padding: 15px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.search-box input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.3s;
-}
-
-.search-box input:focus {
-  border-color: #667eea;
-}
-
 .nav-menu {
   flex: 1;
   padding: 10px 0;
