@@ -119,13 +119,9 @@ function createWindowCard(window, index) {
   header.className = 'window-header';
   header.onclick = () => toggleWindowExpand(card);
   
-  const icon = document.createElement('div');
-  icon.className = 'window-icon';
-  icon.innerHTML = window.focused ? '🟢' : '⚪';
-  
   const title = document.createElement('div');
   title.className = 'window-title';
-  title.textContent = `${window.focused ? 'Current Window' : `Window ${index + 1}`}`;
+  title.textContent = `Window ${index + 1}`;
   
   const meta = document.createElement('div');
   meta.className = 'window-meta';
@@ -159,7 +155,6 @@ function createWindowCard(window, index) {
   meta.appendChild(tabLabel);
   meta.appendChild(actions);
   
-  header.appendChild(icon);
   header.appendChild(title);
   header.appendChild(meta);
   
