@@ -140,13 +140,32 @@ function createTabItem(tab, windowId) {
   checkbox.dataset.tabId = tab.id;
   checkbox.dataset.windowId = windowId;
   
+  const favicon = document.createElement('div');
+  favicon.className = 'tab-favicon';
+  
   if (tab.favIconUrl) {
-    const favicon = document.createElement('img');
-    favicon.className = 'tab-favicon';
-    favicon.src = tab.favIconUrl;
-    favicon.onerror = () => { favicon.style.display = 'none'; };
-    item.appendChild(favicon);
+    const img = document.createElement('img');
+    img.src = tab.favIconUrl;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.onerror = () => {
+      img.remove();
+      favicon.innerHTML = '🌐';
+      favicon.style.display = 'flex';
+      favicon.style.alignItems = 'center';
+      favicon.style.justifyContent = 'center';
+      favicon.style.fontSize = '12px';
+    };
+    favicon.appendChild(img);
+  } else {
+    favicon.innerHTML = '🌐';
+    favicon.style.display = 'flex';
+    favicon.style.alignItems = 'center';
+    favicon.style.justifyContent = 'center';
+    favicon.style.fontSize = '12px';
   }
+  
+  item.appendChild(favicon);
   
   const info = document.createElement('div');
   info.className = 'tab-info';
