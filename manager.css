@@ -107,16 +107,21 @@ body {
 }
 
 .windows-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px;
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .window-card {
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 600px;
   transition: box-shadow 0.3s;
 }
 
@@ -210,8 +215,10 @@ body {
 }
 
 .tabs-container {
-  max-height: 500px;
+  flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
 }
 
 .tab-item {

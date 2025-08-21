@@ -10,8 +10,6 @@ function setupEventListeners() {
 
   // Toolbar buttons (refresh button removed - auto-refresh is now enabled)
   document.getElementById('mergeAllBtn').addEventListener('click', mergeAllWindows);
-  document.getElementById('listViewBtn').addEventListener('click', () => setViewMode('list'));
-  document.getElementById('gridViewBtn').addEventListener('click', () => setViewMode('grid'));
   
   // Sort button
   document.getElementById('executeSortBtn').addEventListener('click', () => {
@@ -262,21 +260,6 @@ async function mergeAllWindows() {
 }
 
 
-function setViewMode(mode) {
-  document.getElementById('listViewBtn').classList.toggle('active', mode === 'list');
-  document.getElementById('gridViewBtn').classList.toggle('active', mode === 'grid');
-  
-  const container = document.getElementById('windowsList');
-  if (mode === 'grid') {
-    container.style.display = 'grid';
-    container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
-    container.style.gap = '15px';
-  } else {
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.gap = '12px';
-  }
-}
 
 function sortTabs(tabs) {
   // Always sort by domain
