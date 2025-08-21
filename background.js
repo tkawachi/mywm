@@ -30,11 +30,32 @@ function notifyUIRefresh() {
   });
 }
 
+async function openOrFocusManager() {
+  try {
+    const managerUrl = chrome.runtime.getURL('manager.html');
+    const tabs = await chrome.tabs.query({ url: managerUrl });
+    
+    if (tabs.length > 0) {
+      // Manager tab already exists, focus it
+      const tab = tabs[0];
+      await chrome.tabs.update(tab.id, { active: true });
+      await chrome.windows.update(tab.windowId, { focused: true });
+    } else {
+      // Create new manager tab
+      await chrome.tabs.create({ url: managerUrl });
+    }
+  } catch (error) {
+    console.error('Error opening/focusing manager:', error);
+  }
+}
+
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === 'search-tabs') {
     chrome.action.openPopup();
   } else if (command === 'sort-tabs') {
     await sortCurrentWindow();
+  } else if (command === 'open-manager') {
+    await openOrFocusManager();
   }
 });
 
