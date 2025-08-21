@@ -1,10 +1,8 @@
 let currentWindows = [];
-let savedWindows = [];
 let currentView = 'active';
 
 document.addEventListener('DOMContentLoaded', () => {
   loadActiveWindows();
-  loadSavedWindows();
   setupEventListeners();
   updateWindowCount();
 });
@@ -23,7 +21,6 @@ function setupEventListeners() {
 
   // Toolbar buttons (refresh button removed - auto-refresh is now enabled)
   document.getElementById('mergeAllBtn').addEventListener('click', mergeAllWindows);
-  document.getElementById('saveAllBtn').addEventListener('click', saveAllWindows);
   document.getElementById('listViewBtn').addEventListener('click', () => setViewMode('list'));
   document.getElementById('gridViewBtn').addEventListener('click', () => setViewMode('grid'));
   
@@ -81,8 +78,6 @@ function switchView(view) {
   
   if (view === 'active') {
     loadActiveWindows();
-  } else if (view === 'saved') {
-    loadSavedWindows();
   }
 }
 
@@ -94,12 +89,6 @@ async function loadActiveWindows() {
   });
 }
 
-async function loadSavedWindows() {
-  chrome.runtime.sendMessage({ action: 'getSavedWindows' }, (windows) => {
-    savedWindows = windows || [];
-    renderSavedWindows();
-  });
-}
 
 function renderActiveWindows() {
   const container = document.getElementById('windowsList');
@@ -117,33 +106,12 @@ function renderActiveWindows() {
   container.innerHTML = '';
   
   currentWindows.forEach((window, index) => {
-    const windowCard = createWindowCard(window, index, false);
+    const windowCard = createWindowCard(window, index);
     container.appendChild(windowCard);
   });
 }
 
-function renderSavedWindows() {
-  const container = document.getElementById('savedWindowsList');
-  
-  if (savedWindows.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <h3>No saved windows</h3>
-        <p>Save windows to restore them later</p>
-      </div>
-    `;
-    return;
-  }
-  
-  container.innerHTML = '';
-  
-  savedWindows.forEach((window) => {
-    const windowCard = createWindowCard(window, null, true);
-    container.appendChild(windowCard);
-  });
-}
-
-function createWindowCard(window, index, isSaved) {
+function createWindowCard(window, index) {
   const card = document.createElement('div');
   card.className = 'window-card';
   
@@ -153,11 +121,11 @@ function createWindowCard(window, index, isSaved) {
   
   const icon = document.createElement('div');
   icon.className = 'window-icon';
-  icon.innerHTML = isSaved ? '📁' : (window.focused ? '🟢' : '⚪');
+  icon.innerHTML = window.focused ? '🟢' : '⚪';
   
   const title = document.createElement('div');
   title.className = 'window-title';
-  title.textContent = isSaved ? window.name : `${window.focused ? 'Current Window' : `Window ${index + 1}`}`;
+  title.textContent = `${window.focused ? 'Current Window' : `Window ${index + 1}`}`;
   
   const meta = document.createElement('div');
   meta.className = 'window-meta';
@@ -172,39 +140,19 @@ function createWindowCard(window, index, isSaved) {
   const actions = document.createElement('div');
   actions.className = 'window-actions';
   
-  if (isSaved) {
-    const restoreBtn = createActionButton('Restore', 'primary', () => {
-      chrome.runtime.sendMessage({ action: 'restoreWindow', windowId: window.id });
+  if (currentWindows.length > 1 && !window.focused) {
+    const focusBtn = createActionButton('Focus', '', () => {
+      chrome.windows.update(window.id, { focused: true });
+      loadActiveWindows();
     });
     
-    const deleteBtn = createActionButton('Delete', 'danger', () => {
-      chrome.runtime.sendMessage({ action: 'deleteWindow', windowId: window.id });
-      loadSavedWindows();
+    const closeBtn = createActionButton('Close', 'danger', () => {
+      chrome.windows.remove(window.id);
+      loadActiveWindows();
     });
     
-    actions.appendChild(restoreBtn);
-    actions.appendChild(deleteBtn);
-  } else {
-    const saveBtn = createActionButton('Save', 'primary', () => {
-      saveWindow(window);
-    });
-    
-    if (currentWindows.length > 1 && !window.focused) {
-      const focusBtn = createActionButton('Focus', '', () => {
-        chrome.windows.update(window.id, { focused: true });
-        loadActiveWindows();
-      });
-      
-      const closeBtn = createActionButton('Close', 'danger', () => {
-        chrome.windows.remove(window.id);
-        loadActiveWindows();
-      });
-      
-      actions.appendChild(focusBtn);
-      actions.appendChild(closeBtn);
-    }
-    
-    actions.appendChild(saveBtn);
+    actions.appendChild(focusBtn);
+    actions.appendChild(closeBtn);
   }
   
   meta.appendChild(tabCount);
@@ -223,7 +171,7 @@ function createWindowCard(window, index, isSaved) {
   
   // Render each domain group
   domainGroups.forEach(group => {
-    const groupEl = createDomainGroupElement(group, window.id, isSaved);
+    const groupEl = createDomainGroupElement(group, window.id);
     tabsContainer.appendChild(groupEl);
   });
   
@@ -233,7 +181,7 @@ function createWindowCard(window, index, isSaved) {
   return card;
 }
 
-function createTabItem(tab, windowId, isSaved) {
+function createTabItem(tab, windowId) {
   const item = document.createElement('div');
   item.className = 'tab-item';
   
@@ -263,33 +211,29 @@ function createTabItem(tab, windowId, isSaved) {
   const indicators = document.createElement('div');
   indicators.className = 'tab-indicators';
   
-  if (!isSaved) {
-    item.appendChild(checkbox);
-    
-    if (tab.pinned) {
-      const pinned = document.createElement('div');
-      pinned.className = 'indicator pinned';
-      indicators.appendChild(pinned);
-    }
-    
-    if (tab.audible) {
-      const audio = document.createElement('div');
-      audio.className = tab.mutedInfo?.muted ? 'indicator muted' : 'indicator audio';
-      indicators.appendChild(audio);
-    }
+  item.appendChild(checkbox);
+  
+  if (tab.pinned) {
+    const pinned = document.createElement('div');
+    pinned.className = 'indicator pinned';
+    indicators.appendChild(pinned);
+  }
+  
+  if (tab.audible) {
+    const audio = document.createElement('div');
+    audio.className = tab.mutedInfo?.muted ? 'indicator muted' : 'indicator audio';
+    indicators.appendChild(audio);
   }
   
   item.appendChild(info);
   item.appendChild(indicators);
   
-  if (!isSaved) {
-    item.onclick = (event) => {
-      if (!event.target.matches('button, input')) {
-        chrome.tabs.update(tab.id, { active: true });
-        chrome.windows.update(windowId, { focused: true });
-      }
-    };
-  }
+  item.onclick = (event) => {
+    if (!event.target.matches('button, input')) {
+      chrome.tabs.update(tab.id, { active: true });
+      chrome.windows.update(windowId, { focused: true });
+    }
+  };
   
   return item;
 }
@@ -318,8 +262,6 @@ function updateWindowCount() {
 function refresh() {
   if (currentView === 'active') {
     loadActiveWindows();
-  } else if (currentView === 'saved') {
-    loadSavedWindows();
   }
 }
 
@@ -344,45 +286,6 @@ async function mergeAllWindows() {
   }
 }
 
-async function saveAllWindows() {
-  const windows = await chrome.windows.getAll({ populate: true });
-  
-  windows.forEach((window, index) => {
-    const savedWindow = {
-      id: Date.now() + index,
-      name: `All Windows - ${new Date().toLocaleString()}`,
-      tabs: window.tabs.map(tab => ({
-        url: tab.url,
-        title: tab.title,
-        favIconUrl: tab.favIconUrl,
-        pinned: tab.pinned
-      }))
-    };
-    
-    savedWindows.push(savedWindow);
-  });
-  
-  chrome.storage.local.set({ savedWindows });
-  
-  if (currentView === 'saved') {
-    renderSavedWindows();
-  }
-}
-
-function saveWindow(window) {
-  const savedWindow = {
-    id: Date.now(),
-    name: `Window - ${new Date().toLocaleString()}`,
-    tabs: window.tabs
-  };
-  
-  savedWindows.push(savedWindow);
-  chrome.storage.local.set({ savedWindows });
-  
-  if (currentView === 'saved') {
-    renderSavedWindows();
-  }
-}
 
 function searchTabs(query) {
   if (!query) {
@@ -419,7 +322,7 @@ function searchTabs(query) {
   container.innerHTML = '';
   
   filteredWindows.forEach((window, index) => {
-    const windowCard = createWindowCard(window, index, false);
+    const windowCard = createWindowCard(window, index);
     container.appendChild(windowCard);
   });
 }
@@ -515,7 +418,7 @@ function groupTabsByDomain(tabs) {
   return groups;
 }
 
-function createDomainGroupElement(group, windowId, isSaved) {
+function createDomainGroupElement(group, windowId) {
   const groupEl = document.createElement('div');
   groupEl.className = 'domain-group';
   
@@ -560,20 +463,18 @@ function createDomainGroupElement(group, windowId, isSaved) {
   const actionsEl = document.createElement('div');
   actionsEl.className = 'domain-actions';
   
-  // Close all tabs button (only for non-saved windows)
-  if (!isSaved) {
-    const closeAllBtn = document.createElement('button');
-    closeAllBtn.className = 'domain-close-all';
-    closeAllBtn.textContent = '✕';
-    closeAllBtn.title = 'Close all tabs in this group';
-    closeAllBtn.onclick = (e) => {
-      e.stopPropagation();
-      const tabIds = group.tabs.map(tab => tab.id);
-      chrome.tabs.remove(tabIds);
-      setTimeout(() => loadActiveWindows(), 100);
-    };
-    actionsEl.appendChild(closeAllBtn);
-  }
+  // Close all tabs button
+  const closeAllBtn = document.createElement('button');
+  closeAllBtn.className = 'domain-close-all';
+  closeAllBtn.textContent = '✕';
+  closeAllBtn.title = 'Close all tabs in this group';
+  closeAllBtn.onclick = (e) => {
+    e.stopPropagation();
+    const tabIds = group.tabs.map(tab => tab.id);
+    chrome.tabs.remove(tabIds);
+    setTimeout(() => loadActiveWindows(), 100);
+  };
+  actionsEl.appendChild(closeAllBtn);
   
   // Expand/collapse indicator
   const expandEl = document.createElement('span');
@@ -591,7 +492,7 @@ function createDomainGroupElement(group, windowId, isSaved) {
   
   // Tabs are already sorted by URL within groups
   group.tabs.forEach(tab => {
-    const tabEl = createTabItem(tab, windowId, isSaved);
+    const tabEl = createTabItem(tab, windowId);
     tabsListEl.appendChild(tabEl);
   });
   

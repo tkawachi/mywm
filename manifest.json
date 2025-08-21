@@ -30,13 +30,6 @@
     "128": "icon128.png"
   },
   "commands": {
-    "save-window": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+S",
-        "mac": "Command+Shift+S"
-      },
-      "description": "Save current window"
-    },
     "search-tabs": {
       "suggested_key": {
         "default": "Ctrl+Shift+F",

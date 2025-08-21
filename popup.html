@@ -24,22 +24,10 @@
     </div>
     
     <div class="tabs-container">
-      <div class="tabs-header">
-        <button class="tab-button active" data-tab="current">Current Windows</button>
-        <button class="tab-button" data-tab="saved">Saved Windows</button>
+      <div class="actions">
+        <button id="mergeWindows" class="action-button">Merge All Windows</button>
       </div>
-      
-      <div class="tab-content active" id="current-tab">
-        <div class="actions">
-          <button id="saveCurrentWindow" class="action-button">Save Current Window</button>
-          <button id="mergeWindows" class="action-button">Merge All Windows</button>
-        </div>
-        <div id="currentWindows" class="windows-list"></div>
-      </div>
-      
-      <div class="tab-content" id="saved-tab">
-        <div id="savedWindows" class="windows-list"></div>
-      </div>
+      <div id="currentWindows" class="windows-list"></div>
     </div>
     
     <div id="searchResults" class="search-results hidden"></div>
