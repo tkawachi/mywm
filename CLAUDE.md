@@ -5,9 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 MyWM is a Chrome extension (Manifest V3) for window and tab management. The extension provides:
-- Window and tab organization with save/restore functionality
-- Tab sorting capabilities
-- Multiple UI views (popup and full manager page)
+- Real-time window and tab organization with auto-refresh
+- Tab sorting capabilities (by domain)
+- Single manager page interface (accessed via toolbar icon or Cmd+M)
 - Keyboard shortcuts for common operations
 
 ## Architecture
@@ -16,33 +16,33 @@ MyWM is a Chrome extension (Manifest V3) for window and tab management. The exte
 
 1. **Background Service Worker** (`background.js`)
    - Central message handler for all extension operations
-   - Manages saved windows state via Chrome Storage API
+   - Auto-refresh functionality using Chrome API event listeners
    - Handles keyboard shortcuts (sort-tabs, open-manager)
    - Coordinates tab/window manipulation operations
+   - Tab sorting by domain with notifications
 
-2. **Popup Interface** (`popup.js`, `popup.html`, `popup.css`)
-   - Quick access interface from browser toolbar
-   - Two tabs: Current Windows and Saved Windows
-   - Window save/restore and tab management
-
-3. **Manager Page** (`manager.js`, `manager.html`, `manager.css`)
-   - Full-page management interface
-   - Advanced features: batch operations, detailed views
-   - Settings management (dark mode)
+2. **Manager Page** (`manager.js`, `manager.html`, `manager.css`)
+   - Single full-page interface (no popup)
+   - Real-time window and tab display with auto-refresh
+   - Batch operations: merge all windows, sort all windows
    - Grid/list view toggles
+   - Accessed via browser action click or Cmd+M shortcut
 
 ### Message Flow
 
 All operations flow through the background script via Chrome's message passing:
-- UI components send messages with `chrome.runtime.sendMessage`
+- Manager page sends messages with `chrome.runtime.sendMessage`
 - Background script processes requests and returns responses
-- Actions include: `getAllWindows`, `sortTabsInWindow`, etc.
+- Auto-refresh events sent from background to manager via `autoRefresh` messages
+- Actions include: `getAllWindows`, `sortTabsInWindow`, `sortAllWindows`, `mergeAllWindows`
 
-### Data Persistence
+### Auto-Refresh System
 
-- Saved windows stored in `chrome.storage.local`
-- Settings (dark mode, view preferences) also use Chrome Storage API
-- Window data structure includes tabs with url, title, favIconUrl, and pinned status
+The extension automatically refreshes the manager interface when:
+- Tabs are created, removed, or updated (URL/title/status changes)
+- Windows are created or removed
+- Background script sends `autoRefresh` messages to manager page
+- No manual refresh needed - real-time updates via Chrome API event listeners
 
 ## Development Commands
 
@@ -74,9 +74,10 @@ These are callback parameters from Chrome APIs that may be needed for future fun
 
 ## Key Files to Edit
 
-- **Adding new features**: Start with message handler in `background.js` then add UI in popup/manager
+- **Adding new features**: Start with message handler in `background.js` then add UI in manager page
 - **Keyboard shortcuts**: Define in `manifest.json` commands section, handle in `background.js`
-- **UI changes**: Modify corresponding HTML/CSS/JS files (popup.* or manager.*)
+- **UI changes**: Modify manager.html, manager.css, or manager.js
+- **Auto-refresh events**: Add new event listeners in `background.js` and handle in `notifyUIRefresh()`
 - **Permissions**: Update in `manifest.json` if new Chrome APIs needed
 
 ## Chrome Extension APIs Used
