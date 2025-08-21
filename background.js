@@ -49,9 +49,13 @@ async function openOrFocusManager() {
   }
 }
 
+chrome.action.onClicked.addListener(() => {
+  openOrFocusManager();
+});
+
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === 'search-tabs') {
-    chrome.action.openPopup();
+    await openOrFocusManager();
   } else if (command === 'sort-tabs') {
     await sortCurrentWindow();
   } else if (command === 'open-manager') {
