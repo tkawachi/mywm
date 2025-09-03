@@ -1,4 +1,5 @@
 let currentWindows = [];
+let collapsedDomains = new Set(); // Track collapsed domain groups
 
 document.addEventListener('DOMContentLoaded', () => {
   loadActiveWindows();
@@ -47,9 +48,22 @@ async function loadActiveWindows() {
 function renderActiveWindows() {
   const container = document.getElementById('windowsList');
   
-  // Save current scroll position
+  // Save current scroll position before rendering
   const scrollTop = container.scrollTop;
   const scrollLeft = container.scrollLeft;
+  
+  // Save collapsed state of domain groups
+  const currentlyCollapsed = new Set();
+  container.querySelectorAll('.domain-group').forEach(group => {
+    const domainName = group.querySelector('.domain-name')?.textContent;
+    const isCollapsed = group.querySelector('.domain-tabs-list')?.classList.contains('collapsed');
+    if (domainName && isCollapsed) {
+      currentlyCollapsed.add(domainName);
+    }
+  });
+  
+  // Update the global collapsed domains set
+  collapsedDomains = currentlyCollapsed;
   
   if (currentWindows.length === 0) {
     container.innerHTML = `
@@ -68,9 +82,11 @@ function renderActiveWindows() {
     container.appendChild(windowCard);
   });
   
-  // Restore scroll position after rendering
-  container.scrollTop = scrollTop;
-  container.scrollLeft = scrollLeft;
+  // Use requestAnimationFrame to ensure DOM is updated before restoring scroll
+  requestAnimationFrame(() => {
+    container.scrollTop = scrollTop;
+    container.scrollLeft = scrollLeft;
+  });
 }
 
 function createWindowCard(window, index) {
@@ -399,7 +415,9 @@ function createDomainGroupElement(group, windowId) {
   // Expand/collapse indicator
   const expandEl = document.createElement('span');
   expandEl.className = 'expand-indicator';
-  expandEl.textContent = '▼';
+  
+  // Check if this domain should be collapsed based on previous state
+  const isCollapsed = collapsedDomains.has(group.domain);
   
   headerEl.appendChild(domainInfoEl);
   headerEl.appendChild(tabCountEl);
@@ -409,6 +427,14 @@ function createDomainGroupElement(group, windowId) {
   // Create tabs container
   const tabsListEl = document.createElement('div');
   tabsListEl.className = 'domain-tabs-list';
+  
+  // Apply collapsed state if needed
+  if (isCollapsed) {
+    tabsListEl.classList.add('collapsed');
+    expandEl.textContent = '▶';
+  } else {
+    expandEl.textContent = '▼';
+  }
   
   // Tabs are already sorted by URL within groups
   group.tabs.forEach(tab => {
