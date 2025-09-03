@@ -75,18 +75,27 @@ function renderActiveWindows() {
     return;
   }
   
-  container.innerHTML = '';
+  // Create new content in a document fragment for better performance
+  const fragment = document.createDocumentFragment();
   
   currentWindows.forEach((window, index) => {
     const windowCard = createWindowCard(window, index);
-    container.appendChild(windowCard);
+    fragment.appendChild(windowCard);
   });
   
-  // Use requestAnimationFrame to ensure DOM is updated before restoring scroll
-  requestAnimationFrame(() => {
-    container.scrollTop = scrollTop;
-    container.scrollLeft = scrollLeft;
-  });
+  // Clear and append in one operation
+  container.innerHTML = '';
+  container.appendChild(fragment);
+  
+  // Restore scroll position after the next paint
+  // This is more reliable than double RAF
+  if (scrollTop > 0 || scrollLeft > 0) {
+    // Use a microtask to ensure DOM updates are complete
+    Promise.resolve().then(() => {
+      container.scrollTop = scrollTop;
+      container.scrollLeft = scrollLeft;
+    });
+  }
 }
 
 function createWindowCard(window, index) {
