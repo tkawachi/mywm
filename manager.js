@@ -47,6 +47,10 @@ async function loadActiveWindows() {
 function renderActiveWindows() {
   const container = document.getElementById('windowsList');
   
+  // Save current scroll position
+  const scrollTop = container.scrollTop;
+  const scrollLeft = container.scrollLeft;
+  
   if (currentWindows.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
@@ -63,6 +67,10 @@ function renderActiveWindows() {
     const windowCard = createWindowCard(window, index);
     container.appendChild(windowCard);
   });
+  
+  // Restore scroll position after rendering
+  container.scrollTop = scrollTop;
+  container.scrollLeft = scrollLeft;
 }
 
 function createWindowCard(window, index) {
