@@ -334,8 +334,16 @@ function refresh() {
 
 async function mergeAllWindows() {
   const windows = await chrome.windows.getAll({ populate: true });
-  // Filter out Picture-in-Picture windows
-  const filteredWindows = windows.filter(window => !window.alwaysOnTop);
+  // Filter out Picture-in-Picture windows and Chrome app windows
+  const filteredWindows = windows.filter(window => {
+    // Exclude Picture-in-Picture windows
+    if (window.alwaysOnTop) return false;
+    
+    // Exclude Chrome app windows (only process normal browser windows)
+    if (window.type !== 'normal') return false;
+    
+    return true;
+  });
   if (filteredWindows.length <= 1) return;
   
   const currentWindow = await chrome.windows.getCurrent();

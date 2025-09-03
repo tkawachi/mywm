@@ -111,8 +111,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 async function getAllWindows() {
   const windows = await chrome.windows.getAll({ populate: true });
-  // Filter out Picture-in-Picture windows (which are always on top)
-  const filteredWindows = windows.filter(window => !window.alwaysOnTop);
+  // Filter out Picture-in-Picture windows (which are always on top) and Chrome app windows
+  const filteredWindows = windows.filter(window => {
+    // Exclude Picture-in-Picture windows
+    if (window.alwaysOnTop) return false;
+    
+    // Exclude Chrome app windows (type 'app' or 'popup')
+    // Normal browser windows have type 'normal'
+    if (window.type !== 'normal') return false;
+    
+    return true;
+  });
   return filteredWindows.map(window => ({
     id: window.id,
     focused: window.focused,
@@ -149,6 +158,9 @@ async function sortAllWindows() {
       // Skip Picture-in-Picture windows
       if (window.alwaysOnTop) continue;
       
+      // Skip Chrome app windows (only process normal browser windows)
+      if (window.type !== 'normal') continue;
+      
       // Always sort by domain
       const sortedTabs = window.tabs.slice().sort((a, b) => {
         const aValue = new URL(a.url).hostname.toLowerCase();
@@ -172,6 +184,9 @@ async function removeDuplicateTabs() {
     
     // Collect all tabs and track duplicates
     for (const window of windows) {
+      // Skip Chrome app windows (only process normal browser windows)
+      if (window.type !== 'normal') continue;
+      
       for (const tab of window.tabs) {
         const url = tab.url;
         
