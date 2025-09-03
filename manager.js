@@ -1,5 +1,6 @@
 let currentWindows = [];
 let collapsedDomains = new Set(); // Track collapsed domain groups
+let previousWindowsData = null; // Track previous windows state for comparison
 
 document.addEventListener('DOMContentLoaded', () => {
   loadActiveWindows();
@@ -39,7 +40,27 @@ function setupEventListeners() {
 async function loadActiveWindows() {
   chrome.runtime.sendMessage({ action: 'getAllWindows' }, (windows) => {
     currentWindows = windows || [];
-    renderActiveWindows();
+    
+    // Check if windows data has actually changed
+    const currentWindowsData = JSON.stringify(currentWindows.map(w => ({
+      id: w.id,
+      tabs: w.tabs.map(t => ({
+        id: t.id,
+        url: t.url,
+        title: t.title,
+        favIconUrl: t.favIconUrl,
+        pinned: t.pinned,
+        audible: t.audible,
+        mutedInfo: t.mutedInfo
+      }))
+    })));
+    
+    // Only re-render if data has changed
+    if (previousWindowsData !== currentWindowsData) {
+      previousWindowsData = currentWindowsData;
+      renderActiveWindows();
+    }
+    
     updateWindowCount();
   });
 }
@@ -66,35 +87,83 @@ function renderActiveWindows() {
   collapsedDomains = currentlyCollapsed;
   
   if (currentWindows.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <h3>No windows open</h3>
-        <p>Your active windows will appear here</p>
-      </div>
-    `;
+    // Only update if content is different
+    if (!container.querySelector('.empty-state')) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <h3>No windows open</h3>
+          <p>Your active windows will appear here</p>
+        </div>
+      `;
+    }
     return;
   }
   
-  // Create new content in a document fragment for better performance
-  const fragment = document.createDocumentFragment();
+  // Check if we need to do a full re-render or can do incremental updates
+  const existingCards = container.querySelectorAll('.window-card');
+  const needsFullRender = existingCards.length !== currentWindows.length;
   
-  currentWindows.forEach((window, index) => {
-    const windowCard = createWindowCard(window, index);
-    fragment.appendChild(windowCard);
-  });
-  
-  // Clear and append in one operation
-  container.innerHTML = '';
-  container.appendChild(fragment);
-  
-  // Restore scroll position after the next paint
-  // This is more reliable than double RAF
-  if (scrollTop > 0 || scrollLeft > 0) {
-    // Use a microtask to ensure DOM updates are complete
-    Promise.resolve().then(() => {
-      container.scrollTop = scrollTop;
-      container.scrollLeft = scrollLeft;
+  if (needsFullRender) {
+    // Full re-render needed (window count changed)
+    const fragment = document.createDocumentFragment();
+    
+    currentWindows.forEach((window, index) => {
+      const windowCard = createWindowCard(window, index);
+      fragment.appendChild(windowCard);
     });
+    
+    // Clear and append in one operation
+    container.innerHTML = '';
+    container.appendChild(fragment);
+    
+    // Restore scroll position after the next paint
+    if (scrollTop > 0 || scrollLeft > 0) {
+      // Use a microtask to ensure DOM updates are complete
+      Promise.resolve().then(() => {
+        container.scrollTop = scrollTop;
+        container.scrollLeft = scrollLeft;
+      });
+    }
+  } else {
+    // Try incremental update (same number of windows)
+    let needsRebuild = false;
+    
+    // Check if we can reuse existing DOM structure
+    currentWindows.forEach((window, index) => {
+      const existingCard = existingCards[index];
+      if (!existingCard) {
+        needsRebuild = true;
+        return;
+      }
+      
+      // Check if tab count changed
+      const tabCountEl = existingCard.querySelector('.tab-count');
+      if (tabCountEl && tabCountEl.textContent !== `${window.tabs.length}`) {
+        needsRebuild = true;
+      }
+    });
+    
+    if (needsRebuild) {
+      // Something significant changed, do full re-render
+      const fragment = document.createDocumentFragment();
+      
+      currentWindows.forEach((window, index) => {
+        const windowCard = createWindowCard(window, index);
+        fragment.appendChild(windowCard);
+      });
+      
+      container.innerHTML = '';
+      container.appendChild(fragment);
+      
+      // Restore scroll position
+      if (scrollTop > 0 || scrollLeft > 0) {
+        Promise.resolve().then(() => {
+          container.scrollTop = scrollTop;
+          container.scrollLeft = scrollLeft;
+        });
+      }
+    }
+    // If no rebuild needed, DOM stays unchanged
   }
 }
 
