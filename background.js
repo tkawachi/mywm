@@ -65,8 +65,8 @@ async function sortCurrentWindow() {
   try {
     const currentWindow = await chrome.windows.getCurrent({ populate: true });
     const sortedTabs = currentWindow.tabs.slice().sort((a, b) => {
-      const aValue = new URL(a.url).hostname.toLowerCase();
-      const bValue = new URL(b.url).hostname.toLowerCase();
+      const aValue = a.url.toLowerCase();
+      const bValue = b.url.toLowerCase();
       return aValue.localeCompare(bValue);
     });
     
@@ -78,7 +78,7 @@ async function sortCurrentWindow() {
       type: 'basic',
       iconUrl: 'icon48.png',
       title: 'Tabs Sorted',
-      message: `Sorted ${sortedTabs.length} tabs by domain`
+      message: `Sorted ${sortedTabs.length} tabs by URL`
     });
   } catch (error) {
     console.error('Error sorting current window:', error);
@@ -161,10 +161,10 @@ async function sortAllWindows() {
       // Skip Chrome app windows (only process normal browser windows)
       if (window.type !== 'normal') continue;
       
-      // Always sort by domain
+      // Always sort by URL
       const sortedTabs = window.tabs.slice().sort((a, b) => {
-        const aValue = new URL(a.url).hostname.toLowerCase();
-        const bValue = new URL(b.url).hostname.toLowerCase();
+        const aValue = a.url.toLowerCase();
+        const bValue = b.url.toLowerCase();
         return aValue.localeCompare(bValue);
       });
       
